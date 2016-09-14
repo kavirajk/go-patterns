@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Album struct {
 	Model
@@ -15,4 +18,14 @@ type Album struct {
 
 func (a Album) String() string {
 	return fmt.Sprintf("<%d: %s>", a.Id, a.Title)
+}
+
+func (a *Album) Valid() error {
+	if len(strings.TrimSpace(a.Title)) == 0 {
+		return fmt.Errorf("title cannot be blank")
+	}
+	if a.OwnerId == 0 {
+		return fmt.Errorf("invalid owner id: %d", a.OwnerId)
+	}
+	return nil
 }

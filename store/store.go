@@ -27,8 +27,8 @@ func (s store) Picture() PictureStore {
 func NewStore() *store {
 	st := InitStore()
 	st.user = NewUserStore(st)
-	// st.album = NewAlbumStore(st)
-	// st.picture = NewPictureStore(st)
+	st.album = NewAlbumStore(st)
+	st.picture = NewPictureStore(st)
 	return st
 }
 

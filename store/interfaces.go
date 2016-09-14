@@ -16,20 +16,19 @@ type UserStore interface {
 	GetAll() ([]models.User, error)
 }
 
-type UserFriendsStore interface {
-	Save(*models.UserFriends) error
-}
-
 type AlbumStore interface {
 	Save(*models.Album) error
 	Get(id uint) (*models.Album, error)
+	GetActive(id uint) (*models.Album, error)
 	GetBySlug(slug string) (*models.Album, error)
+	GetActiveBySlug(slug string) (*models.Album, error)
 	GetAll() ([]models.Album, error)
+	GetAllActive() ([]models.Album, error)
 }
 
 type PictureStore interface {
 	Save(*models.Picture) error
 	Get(id uint) (*models.Picture, error)
 	GetByAlbum(albumId uint) ([]models.Picture, error)
-	GetAll() ([]models.Album, error)
+	GetAll() ([]models.Picture, error)
 }
