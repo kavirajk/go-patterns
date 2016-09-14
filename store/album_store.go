@@ -76,6 +76,22 @@ func (as *albumStore) GetActiveBySlug(slug string) (*models.Album, error) {
 	return &a, nil
 }
 
+func (as *albumStore) GetByOwner(ownerId uint) ([]models.Album, error) {
+	var albums []models.Album
+	if err := as.db.Find(&albums, "owner_id=?", ownerId).Error; err != nil {
+		return nil, fmt.Errorf("album.get_by_owner.id: %d, %s", ownerId, err)
+	}
+	return albums, nil
+}
+
+func (as *albumStore) GetActiveByOwner(ownerId uint) ([]models.Album, error) {
+	var albums []models.Album
+	if err := as.db.Find(&albums, "owner_id=? and is_active=?", ownerId, true).Error; err != nil {
+		return nil, fmt.Errorf("album.get_by_owner.id: %d, %s", ownerId, err)
+	}
+	return albums, nil
+}
+
 func (as *albumStore) GetAll() ([]models.Album, error) {
 	var albums []models.Album
 	if err := as.db.Find(&albums).Error; err != nil {
@@ -90,4 +106,36 @@ func (as *albumStore) GetAllActive() ([]models.Album, error) {
 		return nil, fmt.Errorf("album.get_all: %s", err)
 	}
 	return albums, nil
+}
+
+func (as *albumStore) Delete(id uint) error {
+	album, err := as.Get(id)
+	if err != nil {
+		return err
+	}
+	for i := range album.Pictures {
+		if err := as.picture.Delete(album.Pictures[i].Id); err != nil {
+			return err
+		}
+	}
+	if err := as.db.Delete(album).Error; err != nil {
+		return fmt.Errorf("picture.delete.id: %d, %s", id, err)
+	}
+	return nil
+}
+
+func (as *albumStore) DeletePermanent(id uint) error {
+	album, err := as.Get(id)
+	if err != nil {
+		return err
+	}
+	for i := range album.Pictures {
+		if err := as.picture.DeletePermanent(album.Pictures[i].Id); err != nil {
+			return err
+		}
+	}
+	if err := as.db.Unscoped().Delete(album).Error; err != nil {
+		return fmt.Errorf("picture.delete_permanent.id: %d, %s", id, err)
+	}
+	return nil
 }

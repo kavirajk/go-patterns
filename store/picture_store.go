@@ -55,3 +55,25 @@ func (ps *pictureStore) GetAll() ([]models.Picture, error) {
 	}
 	return pics, nil
 }
+
+func (ps *pictureStore) Delete(id uint) error {
+	pic, err := ps.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := ps.db.Delete(pic).Error; err != nil {
+		return fmt.Errorf("picture.delete.id: %d, %s", id, err)
+	}
+	return nil
+}
+
+func (ps *pictureStore) DeletePermanent(id uint) error {
+	pic, err := ps.Get(id)
+	if err != nil {
+		return err
+	}
+	if err := ps.db.Unscoped().Delete(pic).Error; err != nil {
+		return fmt.Errorf("picture.delete_permanent.id: %d, %s", id, err)
+	}
+	return nil
+}

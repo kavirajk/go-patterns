@@ -14,6 +14,8 @@ type UserStore interface {
 	Get(id uint) (*models.User, error)
 	GetByUsername(username string) (*models.User, error)
 	GetAll() ([]models.User, error)
+	Delete(id uint) error
+	DeletePermanent(id uint) error
 }
 
 type AlbumStore interface {
@@ -22,8 +24,12 @@ type AlbumStore interface {
 	GetActive(id uint) (*models.Album, error)
 	GetBySlug(slug string) (*models.Album, error)
 	GetActiveBySlug(slug string) (*models.Album, error)
+	GetByOwner(ownerId uint) ([]models.Album, error)
+	GetActiveByOwner(ownerId uint) ([]models.Album, error)
 	GetAll() ([]models.Album, error)
 	GetAllActive() ([]models.Album, error)
+	Delete(id uint) error
+	DeletePermanent(id uint) error
 }
 
 type PictureStore interface {
@@ -31,4 +37,6 @@ type PictureStore interface {
 	Get(id uint) (*models.Picture, error)
 	GetByAlbum(albumId uint) ([]models.Picture, error)
 	GetAll() ([]models.Picture, error)
+	Delete(id uint) error
+	DeletePermanent(id uint) error
 }
