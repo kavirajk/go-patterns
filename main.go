@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/kavirajk/go-patterns/models"
 	"github.com/kavirajk/go-patterns/store"
 	_ "github.com/lib/pq"
 )
@@ -26,13 +24,18 @@ func main() {
 	// if err := st.User().Save(&user); err != nil {
 	// 	log.Fatal(err)
 	// }
-	album := models.Album{Title: "No idea", OwnerId: 2}
-	if err := st.Album().Save(&album); err != nil {
+	// album := models.Album{Title: "No idea", OwnerId: user.Id}
+	// if err := st.Album().Save(&album); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// pic := models.Picture{Caption: "Andrew and Sarah", AlbumId: album.Id}
+	// if err := st.Picture().Save(&pic); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	err := st.Album().DeletePermanent(2)
+	if err != nil {
 		log.Fatal(err)
 	}
-	pic := models.Picture{Caption: "Andrew and Sarah", AlbumId: album.Id}
-	if err := st.Picture().Save(&pic); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(album.Pictures)
+
 }

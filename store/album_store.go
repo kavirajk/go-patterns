@@ -136,33 +136,30 @@ func (as *albumStore) GetAllActive() ([]models.Album, error) {
 }
 
 func (as *albumStore) Delete(id uint) error {
-	album, err := as.Get(id)
-	if err != nil {
-		return err
+	tx := as.db.Begin()
+	if err := tx.Where("album_id=?", id).Delete([]models.Picture{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("album.permanent.delete.id %d: %s", id, err)
 	}
-	for i := range album.Pictures {
-		if err := as.picture.Delete(album.Pictures[i].Id); err != nil {
-			return err
-		}
+	if err := tx.Where("id=?", id).Delete(&models.Album{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("album.permanent.delete.id %d: %s", id, err)
 	}
-	if err := as.db.Delete(album).Error; err != nil {
-		return fmt.Errorf("picture.delete.id: %d, %s", id, err)
-	}
+	tx.Commit()
 	return nil
 }
 
 func (as *albumStore) DeletePermanent(id uint) error {
-	album, err := as.Get(id)
-	if err != nil {
-		return err
+	udb := as.db.Unscoped()
+	tx := udb.Begin()
+	if err := tx.Where("album_id=?", id).Delete([]models.Picture{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("album.permanent.delete.id %d: %s", id, err)
 	}
-	for i := range album.Pictures {
-		if err := as.picture.DeletePermanent(album.Pictures[i].Id); err != nil {
-			return err
-		}
+	if err := tx.Where("id=?", id).Delete(&models.Album{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("album.permanent.delete.id %d: %s", id, err)
 	}
-	if err := as.db.Unscoped().Delete(album).Error; err != nil {
-		return fmt.Errorf("picture.delete_permanent.id: %d, %s", id, err)
-	}
+	tx.Commit()
 	return nil
 }
