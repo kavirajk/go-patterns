@@ -22,12 +22,16 @@ func main() {
 	// if err := st.Album().Save(&album); err != nil {
 	// 	log.Fatal(err)
 	// }
-	pic := models.Picture{Caption: "Andrew and Sarah", AlbumId: 1}
-	if err := st.Picture().Save(&pic); err != nil {
+	// user := models.User{Username: "kaviraj", Password: "kaviraj."}
+	// if err := st.User().Save(&user); err != nil {
+	// 	log.Fatal(err)
+	// }
+	album := models.Album{Title: "No idea", OwnerId: 2}
+	if err := st.Album().Save(&album); err != nil {
 		log.Fatal(err)
 	}
-	album, err := st.Album().Get(1)
-	if err != nil {
+	pic := models.Picture{Caption: "Andrew and Sarah", AlbumId: album.Id}
+	if err := st.Picture().Save(&pic); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(album.Pictures)

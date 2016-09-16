@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/kavirajk/go-patterns/models"
 )
@@ -11,8 +12,34 @@ type pictureStore struct {
 }
 
 func NewPictureStore(st *store) *pictureStore {
-	st.db.AutoMigrate(new(models.Picture))
-	return &pictureStore{st}
+	ps := &pictureStore{st}
+	ps.CreateTableIfNotExist()
+	ps.CreateIndexesIfNotExists()
+	return ps
+}
+
+func (ps *pictureStore) CreateTableIfNotExist() {
+	if !ps.db.HasTable(&models.Picture{}) {
+		ps.db.CreateTable(&models.Picture{})
+		ps.db.Model(&models.Picture{}).AddForeignKey("album_id", "albums(id)", "RESTRICT", "RESTRICT")
+		if ps.db.Error != nil {
+			log.Fatalf("critical.picture.migrate.create_table: %s", ps.db.Error)
+		}
+	}
+}
+
+func (ps *pictureStore) CreateIndexesIfNotExists() {
+	indexes := map[string]string{
+		"idx_picture_created_at": "created_at",
+		"idx_picture_updated_at": "updated_at",
+		"idx_picture_deleted_at": "deleted_at",
+	}
+	for k, v := range indexes {
+		ps.db.Model(&models.Picture{}).AddIndex(k, v)
+		if ps.db.Error != nil {
+			log.Fatalf("critical.picture.migrate.create_indexes: %s", ps.db.Error)
+		}
+	}
 }
 
 func (ps *pictureStore) Save(pic *models.Picture) error {

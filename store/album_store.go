@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/kavirajk/go-patterns/models"
@@ -12,8 +13,34 @@ type albumStore struct {
 }
 
 func NewAlbumStore(st *store) *albumStore {
-	st.db.AutoMigrate(new(models.Album))
-	return &albumStore{st}
+	as := &albumStore{st}
+	as.CreateTableIfNotExist()
+	as.CreateIndexesIfNotExists()
+	return as
+}
+
+func (as *albumStore) CreateTableIfNotExist() {
+	if !as.db.HasTable(&models.Album{}) {
+		as.db.CreateTable(&models.Album{})
+		as.db.Model(&models.Album{}).AddForeignKey("owner_id", "users(id)", "RESTRICT", "RESTRICT")
+		if as.db.Error != nil {
+			log.Fatalf("critical.album.migrate.create_table: %s", as.db.Error)
+		}
+	}
+}
+
+func (as *albumStore) CreateIndexesIfNotExists() {
+	indexes := map[string]string{
+		"idx_album_created_at": "created_at",
+		"idx_album_updated_at": "updated_at",
+		"idx_album_deleted_at": "deleted_at",
+	}
+	for k, v := range indexes {
+		as.db.Model(&models.Album{}).AddIndex(k, v)
+		if as.db.Error != nil {
+			log.Fatalf("critical.album.migrate.create_indexes: %s", as.db.Error)
+		}
+	}
 }
 
 func (as *albumStore) Save(album *models.Album) error {
